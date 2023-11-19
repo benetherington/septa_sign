@@ -1,8 +1,9 @@
 import {LitElement, html, css, until, map} from '/lit-all.min.js';
 
-export default class RouteSelector extends LitElement {
+export default class StopSelector extends LitElement {
     static properties = {
         selectedRouteId: {type: String, reflect: true},
+        selectedStopId: {type: String, reflect: true},
     };
 
     static styles = css`
@@ -19,13 +20,13 @@ export default class RouteSelector extends LitElement {
             gap: 10px;
         }
 
-        .route {
+        .stop {
             cursor: pointer;
         }
-        .route:hover {
+        .stop:hover {
             background-color: #cadeff80;
         }
-        .route.selected {
+        .stop.selected {
             background-color: #cadeff;
         }
     `;
@@ -33,46 +34,48 @@ export default class RouteSelector extends LitElement {
     render() {
         return html`
             <div class="list-container">
-                ${until(this.routesContent(), this.loadingContent())}
+                ${this.selectedRouteId
+                    ? until(this.stopsContent(), this.loadingContent())
+                    : html`Select a route`}
             </div>
         `;
     }
 
-    async routesContent() {
-        const routes = await this.routes;
+    async stopsContent() {
+        if (!this.stops) this.stops = await this.getStops();
         return html`
-            ${map(routes, ([id, name]) => {
-                const selected = id === this.selectedRouteId;
+            ${map(this.stops, ({stopname, stopid}) => {
+                const selected = stopid === this.selectedStopId;
                 return html`
                     <div
-                        class="route ${selected ? 'selected' : ''}"
-                        data-id="${id}"
-                        @click=${this.routeClick}>
-                        ${name}
+                        class="stop ${selected ? 'selected' : ''}"
+                        data-id="${stopid}"
+                        @click=${this.stopClick}>
+                        ${stopname}
                     </div>
                 `;
             })}
         `;
     }
     loadingContent() {
-        return html`Loading routes...`;
+        return html`Loading stops...`;
     }
 
     constructor() {
         super();
 
-        this.routes = this.getRoutes();
+        this.selectedRouteId = null;
     }
 
-    async getRoutes() {
-        const url = '/septa/bus/routes';
+    async getStops() {
+        const url = `/septa/bus/route/${this.selectedRouteId}`;
         const resp = await fetch(url);
         return resp.json();
     }
 
-    routeClick(event) {
-        this.selectedRouteId = event.target.dataset.id;
+    stopClick(event) {
+        this.selectedStopId = event.target.dataset.id;
         this.dispatchEvent(new Event('select'));
     }
 }
-customElements.define('route-selector', RouteSelector);
+customElements.define('stop-selector', StopSelector);
