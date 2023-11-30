@@ -6,7 +6,7 @@ module.exports.getConfig = async () => {
     const rawConfig = await db.getConfig();
 
     const stops = await Promise.all(rawConfig.stops.map(getStopFromAddr));
-    return {config: {stops}};
+    return {stops};
 };
 
 const getStopFromAddr = async (addr) => {
@@ -18,7 +18,7 @@ const getStopFromAddr = async (addr) => {
     // Get stop info
     const stops = await api.getStops(routeId);
     const stop = stops.find(({stopid}) => stopid === stopId);
-    const stopName = stops.stopname;
+    const stopName = stop.stopname;
 
-    return {routeId, stopId, routeName, stopName};
+    return {routeId, stopId, routeName, stopName, addr};
 };
