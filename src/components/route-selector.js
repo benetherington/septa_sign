@@ -296,8 +296,10 @@ export default class RouteSelector extends LitElement {
         const success = await this.addStop();
 
         // Update modal
-        if (success) loading.classList.add('hide');
-        else {
+        if (success) {
+            loading.classList.add('hide');
+            this.dispatchEvent(new Event('select'));
+        } else {
             loading.classList.add('fuck');
         }
     };
