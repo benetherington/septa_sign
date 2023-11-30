@@ -1,5 +1,6 @@
 const busRoutes = require('../septa/bus_routes.js');
-const {getStops, getBusArrivals} = require('../septa/api');
+const {getStops} = require('../controllers/septa');
+const {getBusArrivals} = require('../septa/api');
 
 module.exports = (app) => {
     app.get('/septa/bus/routes', (req, res) => res.send(busRoutes));

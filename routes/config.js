@@ -1,8 +1,9 @@
 const db = require('../db.js');
+const controller = require('../controllers/config');
 
 module.exports = (app) => {
     app.get('/config', async (req, res) => {
-        const data = await db.getConfig();
+        const data = await controller.getConfig();
         res.send(data);
     });
 
