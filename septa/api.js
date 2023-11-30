@@ -120,7 +120,7 @@ module.exports.getBusArrivals = async (route, {stopname, stopid}) => {
         const trip = schedule.find((s) => s.trip_id === bus.trip);
 
         // Don't save this bus if it's not coming to this stop
-        if (!bus.isNextStop || trip) return;
+        if (!bus.isNextStop && !trip) return;
 
         // Estimate arrival from timetable
         if (trip) {

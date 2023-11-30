@@ -1,17 +1,16 @@
 const busRoutes = require('../septa/bus_routes.js');
-const {getStops} = require('../controllers/septa');
-const {getBusArrivals} = require('../septa/api');
+const controller = require('../controllers/septa');
 
 module.exports = (app) => {
     app.get('/septa/bus/routes', (req, res) => res.send(busRoutes));
 
     app.get('/septa/bus/route/:route_id', async (req, res) => {
-        const data = await getStops(req.params.route_id);
+        const data = await controller.getStops(req.params.route_id);
         res.send(data);
     });
 
-    app.get('/septa/bus/route/:route_id/stopArrivals', async (req, res) => {
-        const data = await getBusArrivals(req.params.route_id, req.query);
+    app.get('/septa/bus/arrivals', async (req, res) => {
+        const data = await controller.getArrivals();
         res.send(data);
     });
 };
