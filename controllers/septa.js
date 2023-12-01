@@ -19,13 +19,31 @@ module.exports.getArrivals = async () => {
             const [routeId, stopid] = addr.split('/');
             const arrivals = await api.getBusArrivals(routeId, {stopid});
 
-            // Add stop name
+            // Get route name
             const route = routes.find(([id]) => id === routeId);
-            arrivals.forEach((arrival) => {
-                arrival.routeName = route[1];
-            });
+            const routeName = route[1];
 
-            return arrivals;
+            // Get stop name
+            const stops = await this.getStops(routeId);
+            const stop = stops.find((stop) => stop.stopid === stopid);
+            const stopName = stop.stopname;
+
+            // Filter down to needed info
+            return arrivals.map(
+                ({
+                    arrival,
+                    Direction: direction,
+                    estimated_seat_availability: seats,
+                    isNextStop,
+                }) => ({
+                    arrival,
+                    direction,
+                    seats,
+                    isNextStop,
+                    routeName,
+                    stopName,
+                }),
+            );
         }),
     );
 

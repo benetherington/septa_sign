@@ -9,6 +9,30 @@ module.exports = (app) => {
         res.send(data);
     });
 
+    /**
+     * Arrivals route returns a list with objects like:
+     * @property {*} lat
+     * @property {*} lng
+     * @property {*} label
+     * @property {*} route_id
+     * @property {*} trip
+     * @property {*} VehicleID
+     * @property {*} BlockID
+     * @property {*} Direction
+     * @property {*} destination
+     * @property {*} heading
+     * @property {*} late
+     * @property {*} next_stop_id
+     * @property {*} next_stop_name
+     * @property {*} next_stop_sequence
+     * @property {*} estimated_seat_availability
+     * @property {*} Offset
+     * @property {*} Offset_sec
+     * @property {*} timestamp
+     * @property {*} isNextStop
+     * @property {*} arrival
+     * @property {*} routeName
+     */
     app.get('/septa/bus/arrivals', async (req, res) => {
         const data = await controller.getArrivals();
         res.send(data);
