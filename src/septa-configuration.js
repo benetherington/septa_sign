@@ -11,14 +11,11 @@ export default class SeptaConfiguration extends LitElement {
 
     static styles = css`
         :host {
-            height: 50vh;
-            width: 50vw;
-
             position: relative;
+
             display: flex;
             flex-direction: column;
             align-items: center;
-
             padding: 5px;
         }
 
@@ -147,8 +144,10 @@ export default class SeptaConfiguration extends LitElement {
 
         const stopsByRoute = {};
         this.config.stops.forEach((stop) => {
-            stopsByRoute[stop.routeName] ||= [];
-            stopsByRoute[stop.routeName].push(stop);
+            const name = `${stop.routeName}`;
+
+            stopsByRoute[name] ||= [];
+            stopsByRoute[name].push(stop);
         });
 
         return html`${map(

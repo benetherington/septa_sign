@@ -32,7 +32,12 @@ export default class RouteSelector extends LitElement {
         .route .name,
         .stop {
             cursor: pointer;
+
+            overflow: hidden;
+
             padding: 5px 10px;
+            text-wrap: nowrap;
+            text-overflow: ellipsis;
         }
 
         .route:hover,
@@ -302,6 +307,9 @@ export default class RouteSelector extends LitElement {
         } else {
             loading.classList.add('fuck');
         }
+
+        this.routeId = null;
+        this.stopId = null;
     };
 }
 customElements.define('route-selector', RouteSelector);

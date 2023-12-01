@@ -56,3 +56,9 @@ html {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
 }
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
