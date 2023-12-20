@@ -26,7 +26,7 @@ export default class RouteSelector extends LitElement {
             overflow-y: auto;
         }
         :host([columns]) .list-container {
-            max-width: 50%;
+            width: 50%;
         }
 
         .route .name,
@@ -61,15 +61,12 @@ export default class RouteSelector extends LitElement {
         \* ------------- */
 
         .stop-selector {
-            height: 100%;
-            display: block;
-            overflow-y: auto;
-
             display: flex;
             flex-direction: column;
         }
-        :host([columns]) .stop-selector {
+        :host([columns]) .stop-selector-wrapper {
             height: 100%;
+            overflow-y: auto;
         }
 
         .route .stop-selector {
@@ -196,22 +193,24 @@ export default class RouteSelector extends LitElement {
     async stopsContent() {
         if (!this.stops) this.stops = await this.getStops();
         return html`
-            <div class="stop-selector">
-                ${repeat(
-                    this.stops,
-                    ({stopid}) => stopid,
-                    ({stopname, stopid}) => {
-                        const selected = stopid === this.stopId;
-                        return html`
-                            <div
-                                class="stop ${selected ? 'selected' : ''}"
-                                data-id="${stopid}"
-                                @click=${this.stopClick}>
-                                ${stopname}
-                            </div>
-                        `;
-                    },
-                )}
+            <div class="stop-selector-wrapper list-container">
+                <div class="stop-selector">
+                    ${repeat(
+                        this.stops,
+                        ({stopid}) => stopid,
+                        ({stopname, stopid}) => {
+                            const selected = stopid === this.stopId;
+                            return html`
+                                <div
+                                    class="stop ${selected ? 'selected' : ''}"
+                                    data-id="${stopid}"
+                                    @click=${this.stopClick}>
+                                    ${stopname}
+                                </div>
+                            `;
+                        },
+                    )}
+                </div>
             </div>
         `;
     }
@@ -285,6 +284,8 @@ export default class RouteSelector extends LitElement {
             this.routeId = route.dataset.id;
             this.routeName = route.innerText;
         }
+
+        this.stops = null;
     };
 
     stopClick = (event) => {
