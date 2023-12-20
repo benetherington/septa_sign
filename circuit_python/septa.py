@@ -75,13 +75,14 @@ main_group.append(error_txt)
 
 # Arrivals group
 arrivals_group = displayio.Group()
+main_group.append(arrivals_group)
 
 
 
 #
 # WIFI setup
 #
-BASE_URL = "https://adorable-better-education.glitch.me"
+BASE_URL = "https://septa-sign-rae-riley.glitch.me"
 pool = socketpool.SocketPool(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
@@ -107,7 +108,7 @@ def get_line_g():
     return label.Label(LEMON, text="G", padding_right=2, padding_left=1, background_color=(254, 215, 2), color=(0,0,0) )
 
 def get_line(name):
-    l = label.Label(LEMON, text=name, padding_right=1, padding_left=1, color=(0,0,0), background_color=(100,100,100))
+    l = label.Label(LEMON, text=name, padding_right=1, padding_left=1, padding_bottom=1, color=(0,0,0), background_color=(100,100,100))
     l.y = 4
     return l
 
