@@ -26,6 +26,7 @@ module.exports.getArrivals = async () => {
             // Get stop name
             const stops = await this.getStops(routeId);
             const stop = stops.find((stop) => stop.stopid === stopid);
+            if (stop == null) return [];
             const stopName = stop.stopname;
 
             // Filter down to needed info
