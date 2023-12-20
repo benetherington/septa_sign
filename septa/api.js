@@ -4,7 +4,10 @@ const apiFetch = async (path, params = {}) => {
     const url = new URL('https://www3.septa.org/api/' + path);
     Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
 
-    const headers = {Accept: 'application/json'};
+    const headers = {
+        Accept: 'application/json',
+        'User-Agent': 'Septa Sign/1.0 ben.etherington@hey.com',
+    };
     const mode = 'cors';
 
     const resp = await fetch(url, {headers, mode});
