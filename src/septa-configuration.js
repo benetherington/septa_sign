@@ -49,7 +49,9 @@ export default class SeptaConfiguration extends LitElement {
            STOP LIST
         \* --------- */
         .stop-list-wrapper {
-            margin: 5px;
+            box-sizing: border-box;
+            padding: 5px;
+            width: 100%;
         }
 
         .stop-list {
