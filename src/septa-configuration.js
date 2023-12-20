@@ -12,11 +12,11 @@ export default class SeptaConfiguration extends LitElement {
     static styles = css`
         :host {
             position: relative;
+            height: 100vh;
 
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 5px;
         }
 
         h2 {
@@ -48,6 +48,10 @@ export default class SeptaConfiguration extends LitElement {
         /* --------- *\
            STOP LIST
         \* --------- */
+        .stop-list-wrapper {
+            margin: 5px;
+        }
+
         .stop-list {
             align-self: normal;
 
@@ -86,6 +90,7 @@ export default class SeptaConfiguration extends LitElement {
            ROUTE SELECTOR
         \* -------------- */
         .route-selector-modal {
+            box-sizing: border-box;
             display: none;
             flex-direction: column;
 
@@ -119,9 +124,11 @@ export default class SeptaConfiguration extends LitElement {
 
     render() {
         return html`
-            <h2 class="connected">Current Bus Stops</h2>
-            <div class="stop-list has-header">
-                ${until(this.routesContent(), html`Loading routes...`)}
+            <div class="stop-list-wrapper">
+                <h2 class="connected">Current Bus Stops</h2>
+                <div class="stop-list has-header">
+                    ${until(this.routesContent(), html`Loading routes...`)}
+                </div>
             </div>
 
             <bold-button @click=${() => (this.mode = 'route')}>

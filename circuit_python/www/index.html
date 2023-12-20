@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<head>
+    <style>
+        body * {
+            font-size: 3rem;
+        }
+
+        .vert {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        const send = async () => {
+            const ssid = document.getElementById("ssid").value;
+            const password = document.getElementById("password").value;
+            const body = JSON.stringify({ ssid, password });
+
+            const method = "POST";
+            const headers = {
+                "Content-Type": "application/json",
+            };
+
+            const resp = await fetch("/", { method, headers, body });
+            document.getElementById("success").classList.add("hidden");
+
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Listen for submit button
+            document.getElementById("submit").addEventListener("click", send);
+
+            // Load existing credentials
+            const resp = await fetch("/credentials");
+            const jsn = await resp.json();
+
+            document.getElementById("ssid").value = jsn.ssid || "";
+            document.getElementById("password").value = jsn.password || "";
+        });
+    </script>
+</head>
+
+<body>
+    <h1> Hey, Rae and/or Riley! </h1>
+
+    <p> What's the wifi? </p>
+
+    <div class="vert">
+        <div class="vert">
+            <label for="ssid"> Wifi network: </label>
+            <input id="ssid" type="text" />
+        </div>
+
+        <div class="vert">
+            <label for="password"> Wifi password: </label>
+            <input id="password" type="text" />
+        </div>
+
+        <button id="submit">Submit and Restart</button>
+    </div>
+
+    <div id="success" class="hidden">
+        <p style="color: rgb(48, 139, 48);">
+            Thanks! I'll reboot now.
+        </p>
+
+        <p>
+            Once the sign has restarted, go to
+            <a href="https://septa-sign-rae-riley.glitch.me">
+                septa-sign-rae-riley.glitch.me
+            </a>
+            to pick which bus stops to monitor!
+        </p>
+    </div>
+</body>
