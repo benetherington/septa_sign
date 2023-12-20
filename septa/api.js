@@ -1,4 +1,4 @@
-const fetch = await import('node-fetch');
+const fetch = require('node-fetch');
 
 const apiFetch = async (path, params = {}) => {
     const url = new URL('https://www3.septa.org/api/' + path);
