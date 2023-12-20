@@ -81,7 +81,7 @@ arrivals_group = displayio.Group()
 #
 # WIFI setup
 #
-BASE_URL = "http://192.168.0.13:8080"
+BASE_URL = "https://adorable-better-education.glitch.me"
 pool = socketpool.SocketPool(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
