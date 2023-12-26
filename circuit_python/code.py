@@ -13,7 +13,7 @@ if not credentials["ssid"] or not credentials["password"]:
 # Connect to WIFI
 attempts = 0
 while attempts < 2:
-    print(f"CONNECTING TO {credentials["ssid"]}")
+    print(f"CONNECTING TO {credentials['ssid']}")
     
     try:
         wifi.radio.connect(credentials["ssid"], password=credentials["password"])

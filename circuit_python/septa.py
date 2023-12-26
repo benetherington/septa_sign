@@ -4,6 +4,7 @@ import rgbmatrix
 import framebufferio
 from adafruit_bitmap_font import bitmap_font
 from adafruit_display_text import label
+from time import sleep
 
 import wifi
 import adafruit_requests
@@ -12,6 +13,8 @@ import ssl
 import time
 import rtc
 import adafruit_ntp
+
+from timezone import US_Eastern
 
 print("GOOD MORNING!")
 
@@ -68,14 +71,22 @@ ampel_grid = displayio.TileGrid(ampel_bmp, pixel_shader=ampel_bmp.pixel_shader)
 main_group.append(ampel_grid)
 
 # Error icon
-error_txt = label.Label(LEMON, text="!!!", color=(244, 67, 54) )
-error_txt.y = width - LEMON_HEIGHT
+error_txt = label.Label(FONT, text="!!!", color=(244, 67, 54) )
+error_txt.y = FONT_OFFSET_Y
 error_txt.hidden = True
-main_group.append(error_txt)
+main_group.insert(0, error_txt)
+
+# Clock header
+clock_text = label.Label(FONT, text="00:00")
+clock_text.x = 8
+clock_text.y = FONT_OFFSET_Y
+main_group.insert(0, clock_text)
+
 
 # Arrivals group
 arrivals_group = displayio.Group()
-main_group.append(arrivals_group)
+arrivals_group.y = FONT_HEIGHT + 2
+main_group.insert(0, arrivals_group)
 
 
 
@@ -107,8 +118,16 @@ def get_line_t():
 def get_line_g():
     return label.Label(LEMON, text="G", padding_right=2, padding_left=1, background_color=(254, 215, 2), color=(0,0,0) )
 
-def get_line(name):
-    l = label.Label(LEMON, text=name, padding_right=1, padding_left=1, padding_bottom=1, color=(0,0,0), background_color=(100,100,100))
+def get_line(name, color, background_color):
+    l = label.Label(
+        LEMON,
+        text=name,
+        padding_right=1,
+        padding_left=1,
+        padding_bottom=1,
+        color=color,
+        background_color=background_color
+    )
     l.y = 4
     return l
 
@@ -127,7 +146,7 @@ def get_bus_image():
 
 
 #
-# Main
+# API
 #
 
 def get_arrivals():
@@ -142,6 +161,7 @@ def build_arrival_row(arrival):
     #     'stopName': 'Ridge Av & Green Ln',
     #     'isNextStop': False,
     #     'routeName': '4th-Walnut to Andorra'
+    #     'colors': [[0, 0, 0], [0, 0, 0]]
     # }
     
     # Create a group for this arrival
@@ -151,17 +171,25 @@ def build_arrival_row(arrival):
     route_id, route_name = arrival["routeName"].split(": ")
     print(f"building <{route_id}> - {route_name}")
     
+    # Get configured colors
+    if "colors" in arrival:
+        color, background_color = arrival["colors"]
+    else:
+        use_default_colors = True
+        color = [0,0,0]
+        background_color = [100,100,100]
+    
     # Build icon
-    if route_id == "B":
-        icon = get_line_b
-    elif route_id == "L":
+    if route_id == "B" and not use_default_colors:
+        icon = get_line_b()
+    elif route_id == "L" and not use_default_colors:
         icon = get_line_l()
-    elif route_id == "T":
+    elif route_id == "T" and not use_default_colors:
         icon = get_line_t()
-    elif route_id == "G":
+    elif route_id == "G" and not use_default_colors:
         icon = get_line_g()
     else:
-        icon = get_line(route_id)
+        icon = get_line(route_id, color, background_color)
     icon.y = LEMON_FILLED_OFFSET_Y
     group.append(icon)
     
@@ -202,6 +230,24 @@ def update_arrivals():
         arrivals_group.append(row)
         y_offset += 12
 
+
+
+#
+# CLOCK
+#
+def update_clock():
+    t_struct = US_Eastern.localtime()
+    hour = (t_struct.tm_hour % 12) or 12
+    min = t_struct.tm_min
+    
+    clock_text.text = f"{hour:2}:{min:2}"
+update_clock()
+
+#
+# MAIN
+#
+
+
 # Load initial arrivals, remove placeholder
 try:
     update_arrivals()
@@ -214,10 +260,12 @@ last_update = time.time()
 while True:
     # Wait for next update
     while time.time() - last_update < 30:
-        pass
+        sleep(2)
+        continue
     
     try:
         error_txt.hidden = True
+        update_clock()
         # Do update
         update_arrivals()
         
