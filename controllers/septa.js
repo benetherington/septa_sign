@@ -10,11 +10,27 @@ module.exports.getStops = async (routeId) => {
     return stops[routeId];
 };
 
+/**
+ * @typedef EnrichedBusArrivalObject
+ * @property {number} arrival
+ * @property {string} direction
+ * @property {string} seats
+ * @property {boolean} isNextStop
+ * @property {string} routeName
+ * @property {string} stopName
+ * @property {[number, number, number][]} colors
+ */
+/**
+ * @returns {EnrichedBusArrivalObject[]}
+ */
 module.exports.getArrivals = async () => {
     const config = await db.getConfig();
     const addrs = config.stops;
     const arrivals = await Promise.all(
         addrs.map(async (addr) => {
+            // Get display config
+            const displayConfig = await db.getStopDisplayConfig(addr);
+
             // Get arrivals for this stop
             const [routeId, stopid] = addr.split('/');
             const arrivals = await api.getBusArrivals(routeId, {stopid});
@@ -23,13 +39,24 @@ module.exports.getArrivals = async () => {
             const route = routes.find(([id]) => id === routeId);
             const routeName = route[1];
 
-            // Get stop name
-            const stops = await this.getStops(routeId);
-            const stop = stops.find((stop) => stop.stopid === stopid);
-            if (stop == null) return [];
-            const stopName = stop.stopname;
+            // Get saved nickname
+            let stopName = displayConfig.nickname;
 
-            // Filter down to needed info
+            // Use actual stop name if nickname isn't set
+            if (!stopName) {
+                const stops = await this.getStops(routeId);
+                const stop = stops.find((stop) => stop.stopid === stopid);
+                if (stop == null) return [];
+                stopName = stop.stopname;
+            }
+
+            // Get route colors
+            const colors = [
+                displayConfig.routeColor,
+                displayConfig.arrivalColor,
+            ];
+
+            // Filter, rename, and add stop data to each arrival
             return arrivals.map(
                 ({
                     arrival,
@@ -43,6 +70,7 @@ module.exports.getArrivals = async () => {
                     isNextStop,
                     routeName,
                     stopName,
+                    colors,
                 }),
             );
         }),

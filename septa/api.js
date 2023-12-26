@@ -88,11 +88,20 @@ module.exports.getBusSchedule = (stop_id) =>
     apiFetch('BusSchedules/index.php', {stop_id});
 
 /**
+ * @typedef BusArrivalObject
+ * @property {number} arrival
+ * @property {string} direction
+ * @property {string} seats
+ * @property {boolean} isNextStop
+ * @property {string} routeName
+ * @property {string} stopName
+ */
+/**
  * @param {string} route The name of the route to check
  * @param {object} stop The name or ID of the stop to check
  * @param {string} [stop.stopname]
  * @param {string} [stop.stopid]
- * @returns
+ * @returns {BusArrivalObject}
  */
 module.exports.getBusArrivals = async (route, {stopname, stopid}) => {
     // Check that we got a valid stop

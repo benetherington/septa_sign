@@ -10,28 +10,14 @@ module.exports = (app) => {
     });
 
     /**
-     * Arrivals route returns a list with objects like:
-     * @property {*} lat
-     * @property {*} lng
-     * @property {*} label
-     * @property {*} route_id
-     * @property {*} trip
-     * @property {*} VehicleID
-     * @property {*} BlockID
-     * @property {*} Direction
-     * @property {*} destination
-     * @property {*} heading
-     * @property {*} late
-     * @property {*} next_stop_id
-     * @property {*} next_stop_name
-     * @property {*} next_stop_sequence
-     * @property {*} estimated_seat_availability
-     * @property {*} Offset
-     * @property {*} Offset_sec
-     * @property {*} timestamp
-     * @property {*} isNextStop
-     * @property {*} arrival
-     * @property {*} routeName
+     * Arrivals route returns EnrichedBusArrivalObject[]:
+     * @property {number} arrival
+     * @property {string} direction
+     * @property {string} seats
+     * @property {boolean} isNextStop
+     * @property {string} routeName
+     * @property {string} stopName
+     * @property {[number, number, number][]} colors
      */
     app.get('/septa/bus/arrivals', async (req, res) => {
         const data = await controller.getArrivals();

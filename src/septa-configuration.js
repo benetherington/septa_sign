@@ -3,6 +3,7 @@ import {LitElement, html, css, map, until} from '/lit-all.min.js';
 import './components/route-selector.js';
 import './components/icon-button.js';
 import './components/bold-button.js';
+import './components/color-picker.js';
 
 export default class SeptaConfiguration extends LitElement {
     static properties = {
@@ -81,6 +82,7 @@ export default class SeptaConfiguration extends LitElement {
             display: flex;
             flex-direction: row;
             margin: 5px;
+            gap: 5px;
         }
         .stop .name {
             flex-grow: 1;
@@ -88,10 +90,10 @@ export default class SeptaConfiguration extends LitElement {
             text-align: center;
         }
 
-        /* -------------- *\
-           ROUTE SELECTOR
-        \* -------------- */
-        .route-selector-modal {
+        /* ------ *\
+           MODALS
+        \* ------ */
+        .modal {
             box-sizing: border-box;
             display: none;
             flex-direction: column;
@@ -102,16 +104,20 @@ export default class SeptaConfiguration extends LitElement {
             padding: 15px;
             background-color: #00000080;
         }
-        .route-selector-modal .headers {
+        .modal .headers {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
 
             padding-right: 20px;
         }
-        .route-selector-modal .close {
+        .modal .close {
             cursor: pointer;
         }
+
+        /* -------------- *\
+           ROUTE SELECTOR
+        \* -------------- */
         .route-selector-wrapper {
             overflow: hidden;
             background-color: white;
@@ -122,9 +128,42 @@ export default class SeptaConfiguration extends LitElement {
         route-selector {
             height: 100%;
         }
+
+        /* ------ *\
+           CONFIG
+        \* ------ */
+        :host([mode='config']) .config-modal {
+            display: flex;
+        }
+        .config-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            gap: 20px;
+
+            padding: 20px;
+            background-color: white;
+        }
+        .color-pickers-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .config-modal color-picker {
+            width: fit-content;
+            margin: auto;
+        }
+        #nickname {
+            padding: 20px;
+        }
     `;
 
     render() {
+        const {routeColor, arrivalColor} = this.displayConfig ?? {};
+
         return html`
             <div class="stop-list-wrapper">
                 <h2 class="connected">Current Bus Stops</h2>
@@ -137,13 +176,51 @@ export default class SeptaConfiguration extends LitElement {
                 Add stop
             </bold-button>
 
-            <div class="route-selector-modal">
+            <div class="config-modal modal">
                 <div class="headers">
-                    <h2 class="connected">Add a stop</h2>
+                    <h2 class="connected">Configure</h2>
                     <h2 class="connected close" @click=${this.goHome}>X</h2>
                 </div>
-                <div class="route-selector-wrapper has-header">
-                    <route-selector @select=${this.goHome}> </route-selector>
+                
+                <div class="config-wrapper has-header">
+                    <div class="color-pickers-container">
+                        <div>
+                            <h2 class="connected">Route Number</h2>
+                            <color-picker
+                                id="route-number-color"
+                                class="has-header"
+                            ></color-picker>
+                        </div>
+                        <div>
+                            <h2 class="connected">Arrival Info</h2>
+                            <color-picker
+                                id="arrival-color"
+                                class="has-header"
+                            ></color-picker>
+                        </div>
+                    </div>
+                    
+                    <div class="nickname-container">
+                        <h2 class="connected">Nickname</h2>
+                        <input id="nickname" class="has-header" maxlength="5"/>
+                    </div>
+                    
+                    <bold-button
+                        @click=${this.onConfigSaveClick}>
+                        Save
+                    </bold-button>
+                </div>
+            </div>
+
+                <div class="route-selector-modal modal">
+                    <div class="headers">
+                        <h2 class="connected">Add a stop</h2>
+                        <h2 class="connected close" @click=${this.goHome}>X</h2>
+                    </div>
+                    <div class="route-selector-wrapper has-header">
+                        <route-selector @select=${this.goHome}>
+                        </route-selector>
+                    </div>
                 </div>
             </div>
         `;
@@ -171,9 +248,16 @@ export default class SeptaConfiguration extends LitElement {
                                 <div class="stop">
                                     <div class="name">${stopName}</div>
                                     <icon-button
+                                        icon="gear"
+                                        color="blue"
+                                        @click=${() =>
+                                            this.onConfigClick(addr)}>
+                                    </icon-button>
+                                    <icon-button
                                         icon="trash"
                                         color="red"
-                                        @click=${() => this.removeStop(addr)}>
+                                        @click=${() =>
+                                            this.onRemoveStopClick(addr)}>
                                     </icon-button>
                                 </div>
                             `,
@@ -211,6 +295,34 @@ export default class SeptaConfiguration extends LitElement {
         this.config = await resp.json();
     }
 
+    async getDisplayConfig(addr) {
+        const url = `/config/${addr}`;
+        const resp = await fetch(url);
+        if (!resp.ok) {
+            this.showError(resp);
+            return;
+        }
+
+        const jsn = await resp.json();
+        jsn.addr = addr;
+        return jsn;
+    }
+
+    async setDisplayConfig(addr, config) {
+        const url = `/config/${addr}`;
+        const method = 'PUT';
+        const headers = {'Content-Type': 'application/json'};
+        const body = JSON.stringify(config);
+
+        const resp = await fetch(url, {method, headers, body});
+        if (!resp.ok) {
+            this.showError(resp);
+            return;
+        }
+
+        await this.reloadConfig();
+    }
+
     async removeStop(addr) {
         const url = '/config/stop';
         const method = 'DELETE';
@@ -234,6 +346,55 @@ export default class SeptaConfiguration extends LitElement {
     /*--------------*\
       EVENT HANDLERS
     \*--------------*/
+    async onConfigClick(addr) {
+        // Fetch config
+        this.displayConfig = await this.getDisplayConfig(addr);
+
+        // Apply config to modal inputs
+        this.renderRoot
+            .getElementById('route-number-color')
+            .setSelectedColor(...this.displayConfig.routeColor);
+        this.renderRoot
+            .getElementById('arrival-color')
+            .setSelectedColor(...this.displayConfig.arrivalColor);
+
+        if (this.displayConfig.nickname) {
+            this.renderRoot.getElementById('nickname').value =
+                this.displayConfig.nickname;
+        }
+
+        this.mode = 'config';
+    }
+    async onConfigSaveClick() {
+        // Get address
+        const addr = this.displayConfig.addr;
+
+        // Get color pickers
+        const routePicker =
+            this.renderRoot.getElementById('route-number-color');
+        const arrivalPicker = this.renderRoot.getElementById('arrival-color');
+
+        // Get selected colors
+        const config = {
+            routeColor: routePicker.getSelectedColor(),
+            arrivalColor: arrivalPicker.getSelectedColor(),
+        };
+
+        // Get nickname
+        const nickname = this.renderRoot.getElementById('nickname').value;
+        if (nickname) config.nickname = nickname;
+
+        // Send update
+        console.log(`Setting config for ${addr}:`);
+        console.log(config);
+        await this.setDisplayConfig(addr, config);
+        this.goHome();
+    }
+
+    onDeleteClick(addr) {
+        this.removeStop(addr);
+    }
+
     goHome = () => {
         this.mode = '';
         this.reloadConfig();

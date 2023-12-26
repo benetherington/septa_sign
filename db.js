@@ -1,15 +1,21 @@
+const DB_DEFAULT_DATA = {
+    config: {
+        stops: [],
+        display: {},
+    },
+};
+const DEFAULT_DISPLAY_CONFIG = {
+    routeColor: [2, 2, 2],
+    arrivalColor: [3, 3, 3],
+};
+
 /*--------*\
   DB SETUP
 \*--------*/
 let db;
 const doSetup = async () => {
     const {JSONPreset} = await import('lowdb/node');
-    const defaultData = {
-        config: {
-            stops: [],
-        },
-    };
-    db = await JSONPreset('db.json', defaultData);
+    db = await JSONPreset('db.json', DB_DEFAULT_DATA);
 };
 const setup = doSetup();
 
@@ -20,6 +26,17 @@ module.exports.getConfig = async () => {
     await setup;
     await db.read();
     return db.data.config;
+};
+
+module.exports.getStopDisplayConfig = async (stop) => {
+    await setup;
+
+    // Get display config
+    const display = db.data.config.display;
+    const stopConfig = display?.[stop];
+
+    // Return saved or default config
+    return stopConfig || DEFAULT_DISPLAY_CONFIG;
 };
 
 /*-------*\
@@ -40,6 +57,22 @@ module.exports.addStop = async (stop) => {
     await db.write();
 
     return [201];
+};
+
+module.exports.updateStopDisplayConfig = async (stop, displayConfig) => {
+    await setup;
+
+    // Check incoming data
+    const message = validateStop(stop);
+    if (message) return [400, message];
+
+    // Update data
+    db.data.config.display[stop] = displayConfig;
+
+    // Commit data
+    await db.write();
+
+    return [200];
 };
 
 module.exports.removeStop = async (stop) => {
