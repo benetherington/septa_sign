@@ -2,9 +2,12 @@ import board
 import displayio
 import rgbmatrix
 import framebufferio
+from io import BytesIO
+from time import sleep
+
 from adafruit_bitmap_font import bitmap_font
 from adafruit_display_text import label
-from time import sleep
+import adafruit_imageload as imageload
 
 import wifi
 import adafruit_requests
@@ -68,10 +71,12 @@ LEMON_HEIGHT = 6
 # Placeholder
 ampel_bmp = displayio.OnDiskBitmap("/ampelmannchen.bmp")
 ampel_grid = displayio.TileGrid(ampel_bmp, pixel_shader=ampel_bmp.pixel_shader)
-main_group.append(ampel_grid)
+image_group = displayio.Group()
+image_group.append(ampel_grid)
+main_group.append(image_group)
 
 # Error icon
-error_txt = label.Label(FONT, text="!!!", color=(244, 67, 54) )
+error_txt = label.Label(FONT, text="!!!", color=(244, 67, 54))
 error_txt.y = FONT_OFFSET_Y
 error_txt.hidden = True
 main_group.insert(0, error_txt)
@@ -81,7 +86,6 @@ clock_text = label.Label(FONT, text="00:00")
 clock_text.x = 8
 clock_text.y = FONT_OFFSET_Y
 main_group.insert(0, clock_text)
-
 
 # Arrivals group
 arrivals_group = displayio.Group()
@@ -93,7 +97,8 @@ main_group.insert(0, arrivals_group)
 #
 # WIFI setup
 #
-BASE_URL = "https://septa-sign-rae-riley.glitch.me"
+BASE_URL = "http://192.168.0.13:8080"
+# BASE_URL = "https://septa-sign-rae-riley.glitch.me"
 pool = socketpool.SocketPool(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
@@ -106,6 +111,13 @@ rtc.RTC().datetime = ntp.datetime
 #
 # GRAPHICS UTILITIES
 #
+def clear_image():
+    while len(image_group) > 0:
+        image_group.pop()
+def clear_arrivals():
+    while len(arrivals_group) > 0:
+        arrivals_group.pop()
+
 def get_line_b():
     return label.Label(LEMON, text="B", padding_right=2, padding_left=1, background_color=(250, 100, 0) )
 
@@ -131,28 +143,40 @@ def get_line(name, color, background_color):
     l.y = 4
     return l
 
-def get_bmp(fn):
+def load_on_disk_bmp(fn):
     bmp = displayio.OnDiskBitmap(fn)
     return displayio.TileGrid(bmp, pixel_shader=bmp.pixel_shader)
 
-def get_ampelmannchaen():
-    return get_bmp("/ampelmannchen.bmp")
+def show_image(path):
+    # Fetch the bmp
+    resp = requests.get(BASE_URL + path)
+    bytes_img = BytesIO(resp.content)
+    resp.close()
+    
+    # Create a tile grid to display the bmp
+    image, palette = imageload.load(bytes_img)
+    tile_grid = displayio.TileGrid(image, pixel_shader=palette)
+    
+    # Clear the screen
+    clear_image()
+    clear_arrivals()
+    
+    # Add the new image
+    image_group.append(tile_grid)
 
-def get_bus_image():
-    return get_bmp("/bus.bmp")
-
-
+def convert_color(api_color):
+    r, g, b = api_color
+    r *= 85
+    g *= 85
+    b *= 85
+    return [r, g, b]
 
 
 
 #
-# API
+# Arrivals display
 #
-
-def get_arrivals():
-    resp = requests.get(BASE_URL + "/septa/bus/arrivals")
-    return resp.json()
-
+ARRIVAL_ROW_HEIGHT = 12
 def build_arrival_row(arrival):
     # {
     #     'arrival': 1701368520000,
@@ -173,11 +197,15 @@ def build_arrival_row(arrival):
     
     # Get configured colors
     if "colors" in arrival:
-        color, background_color = arrival["colors"]
+        route_color = convert_color(arrival["colors"][0])
+        arrival_color = convert_color(arrival["colors"][1])
     else:
         use_default_colors = True
-        color = [0,0,0]
-        background_color = [100,100,100]
+        route_color = [170, 170, 170]
+        arrival_color = [255, 255, 255]
+        
+    print(route_color)
+    print(arrival_color)
     
     # Build icon
     if route_id == "B" and not use_default_colors:
@@ -189,18 +217,18 @@ def build_arrival_row(arrival):
     elif route_id == "G" and not use_default_colors:
         icon = get_line_g()
     else:
-        icon = get_line(route_id, color, background_color)
+        icon = get_line(route_id, route_color)
     icon.y = LEMON_FILLED_OFFSET_Y
     group.append(icon)
     
     # Top row: build stop
-    stop = label.Label(FONT, text=arrival["stopName"])
+    stop = label.Label(FONT, text=arrival["stopName"], color=arrival_color)
     stop.y = FONT_OFFSET_Y
     stop.x = 12
     group.append(stop)
     
     # Bottom row: build direction
-    direction = label.Label(FONT, text=arrival["direction"][0])
+    direction = label.Label(FONT, text=arrival["direction"][0], color=arrival_color)
     direction.y = FONT_OFFSET_Y + FONT_HEIGHT + 1
     direction.x = 12
     group.append(direction)
@@ -208,27 +236,28 @@ def build_arrival_row(arrival):
     # Bottom row: build time
     delta_sec = arrival["arrival"] // 1000 - time.time()
     delta = delta_sec // 60
-    time_label = label.Label(FONT, text=str(delta))
+    time_label = label.Label(FONT, text=str(delta), color=arrival_color)
     time_label.y = FONT_OFFSET_Y + FONT_HEIGHT + 1
     time_label.x = 20
     group.append(time_label)
     
     return group
 
-def update_arrivals():
-    print("Fetching arrivals...")
-    arrivals = get_arrivals()
-    print(f"Got {len(arrivals)} to display")
+def show_arrivals(arrivals):
+    # Build arrival groups
+    print(f"Displaying {len(arrivals)} arrivals")
     rows = map(build_arrival_row, arrivals)
     
-    while len(arrivals_group) > 0:
-        arrivals_group.pop()
+    # Clear the screen
+    clear_arrivals()
+    clear_image()
     
+    # Add each arrival group
     y_offset = 0
     for row in rows:
         row.y = y_offset
         arrivals_group.append(row)
-        y_offset += 12
+        y_offset += ARRIVAL_ROW_HEIGHT
 
 
 
@@ -246,14 +275,22 @@ update_clock()
 #
 # MAIN
 #
-
-
-# Load initial arrivals, remove placeholder
-try:
-    update_arrivals()
-except:
-    error_txt.hidden = False
-main_group.remove(ampel_grid)
+def update_display():
+    update_clock()
+    
+    # Load display directive
+    resp = requests.get(BASE_URL + "/directive")
+    directive = resp.json()
+    
+    # Display image
+    if "image" in directive:
+        show_image(directive['image'])
+    elif "arrivals" in directive:
+        show_arrivals(directive['arrivals'])
+    else:
+        error_txt.hidden = False
+    
+    resp.close()
 
 
 last_update = time.time()
@@ -265,11 +302,8 @@ while True:
     
     try:
         error_txt.hidden = True
-        update_clock()
-        # Do update
-        update_arrivals()
-        
-        # Reset for next loop
+        update_display()
         last_update = time.time()
-    except:
+    except Exception as e:
+        print(e)
         error_txt.hidden = False
