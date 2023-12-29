@@ -1,10 +1,3 @@
-const {
-    getStops,
-    getBusses,
-    getBusSchedule,
-    getBusArrivals,
-} = require('./septa/api.js');
-
 /*------*\
   SERVER
 \*------*/
@@ -25,6 +18,7 @@ app.use(express.static('./src'));
 \*--------------*/
 require('./routes/septa.js')(app);
 require('./routes/config.js')(app);
+require('./routes/directive.js')(app);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);

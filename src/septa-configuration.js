@@ -4,6 +4,7 @@ import './components/route-selector.js';
 import './components/icon-button.js';
 import './components/bold-button.js';
 import './components/color-picker.js';
+import './components/sign-schedule.js';
 
 export default class SeptaConfiguration extends LitElement {
     static properties = {
@@ -40,6 +41,8 @@ export default class SeptaConfiguration extends LitElement {
             border: 3px solid darkblue;
             border-radius: 5px;
             border-top-left-radius: 0;
+            flex-shrink: 1;
+            overflow: hidden;
         }
 
         bold-button {
@@ -88,6 +91,14 @@ export default class SeptaConfiguration extends LitElement {
             flex-grow: 1;
             margin: auto;
             text-align: center;
+        }
+
+        /* ------- *\
+           TOOLBAR
+        \* ------- */
+        .toolbar {
+            display: flex;
+            gap: 15px;
         }
 
         /* ------ *\
@@ -159,6 +170,16 @@ export default class SeptaConfiguration extends LitElement {
         #nickname {
             padding: 20px;
         }
+
+        /* -------------- *\
+           SCHEDULE MODAL
+        \* -------------- */
+        :host([mode='schedule']) .sign-schedule-modal {
+            display: flex;
+        }
+        sign-schedule {
+            height: 100%;
+        }
     `;
 
     render() {
@@ -172,55 +193,65 @@ export default class SeptaConfiguration extends LitElement {
                 </div>
             </div>
 
-            <bold-button @click=${() => (this.mode = 'route')}>
-                Add stop
-            </bold-button>
+            <div class="toolbar">
+                <bold-button @click=${() => (this.mode = 'route')}>
+                    Add stop
+                </bold-button>
+                <bold-button @click=${() => (this.mode = 'schedule')}>
+                    Update schedule
+                </bold-button>
+            </div>
 
             <div class="config-modal modal">
                 <div class="headers">
                     <h2 class="connected">Configure</h2>
                     <h2 class="connected close" @click=${this.goHome}>X</h2>
                 </div>
-                
+
                 <div class="config-wrapper has-header">
                     <div class="color-pickers-container">
                         <div>
                             <h2 class="connected">Route Number</h2>
                             <color-picker
                                 id="route-number-color"
-                                class="has-header"
-                            ></color-picker>
+                                class="has-header"></color-picker>
                         </div>
                         <div>
                             <h2 class="connected">Arrival Info</h2>
                             <color-picker
                                 id="arrival-color"
-                                class="has-header"
-                            ></color-picker>
+                                class="has-header"></color-picker>
                         </div>
                     </div>
-                    
+
                     <div class="nickname-container">
                         <h2 class="connected">Nickname</h2>
-                        <input id="nickname" class="has-header" maxlength="5"/>
+                        <input id="nickname" class="has-header" maxlength="5" />
                     </div>
-                    
-                    <bold-button
-                        @click=${this.onConfigSaveClick}>
+
+                    <bold-button @click=${this.onConfigSaveClick}>
                         Save
                     </bold-button>
                 </div>
             </div>
 
-                <div class="route-selector-modal modal">
-                    <div class="headers">
-                        <h2 class="connected">Add a stop</h2>
-                        <h2 class="connected close" @click=${this.goHome}>X</h2>
-                    </div>
-                    <div class="route-selector-wrapper has-header">
-                        <route-selector @select=${this.goHome}>
-                        </route-selector>
-                    </div>
+            <div class="route-selector-modal modal">
+                <div class="headers">
+                    <h2 class="connected">Add a stop</h2>
+                    <h2 class="connected close" @click=${this.goHome}>X</h2>
+                </div>
+                <div class="route-selector-wrapper has-header">
+                    <route-selector @select=${this.goHome}> </route-selector>
+                </div>
+            </div>
+
+            <div class="sign-schedule-modal modal">
+                <div class="headers">
+                    <h2 class="connected">Update Schedule</h2>
+                    <h2 class="connected close" @click=${this.goHome}>X</h2>
+                </div>
+                <div class="sign-schedule-wrapper has-header">
+                    <sign-schedule @done=${this.goHome}> </sign-schedule>
                 </div>
             </div>
         `;

@@ -3,7 +3,10 @@ import {LitElement, html, css} from '/lit-all.min.js';
 export default class BoldButton extends LitElement {
     static properties = {
         color: {type: String},
+        borderColor: {type: String},
         text: {type: String},
+
+        slim: {type: Boolean},
     };
 
     static styles = css`
@@ -19,6 +22,11 @@ export default class BoldButton extends LitElement {
             text-align: center;
             font-weight: 600;
         }
+
+        :host([slim]) {
+            padding: 3px 5px;
+            border-width: 2px;
+        }
     `;
 
     render() {
@@ -27,6 +35,15 @@ export default class BoldButton extends LitElement {
 
     constructor() {
         super();
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        if (this.color) this.style.setProperty('background-color', this.color);
+        if (this.borderColor)
+            this.style.setProperty('border-color', this.borderColor);
+        if (this.text) this.style.setProperty('color', this.text);
     }
 }
 customElements.define('bold-button', BoldButton);

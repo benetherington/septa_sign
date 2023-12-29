@@ -16,6 +16,7 @@ import ssl
 import time
 import rtc
 import adafruit_ntp
+import traceback
 
 from timezone import US_Eastern
 
@@ -69,7 +70,7 @@ LEMON_FILLED_OFFSET_Y = 4
 LEMON_HEIGHT = 6
 
 # Placeholder
-ampel_bmp = displayio.OnDiskBitmap("/ampelmannchen.bmp")
+ampel_bmp = displayio.OnDiskBitmap("images/ampelmannchen.bmp")
 ampel_grid = displayio.TileGrid(ampel_bmp, pixel_shader=ampel_bmp.pixel_shader)
 image_group = displayio.Group()
 image_group.append(ampel_grid)
@@ -97,8 +98,8 @@ main_group.insert(0, arrivals_group)
 #
 # WIFI setup
 #
-BASE_URL = "http://192.168.0.13:8080"
-# BASE_URL = "https://septa-sign-rae-riley.glitch.me"
+# BASE_URL = "http://192.168.0.13:8080"
+BASE_URL = "https://septa-sign-rae-riley.glitch.me"
 pool = socketpool.SocketPool(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
@@ -143,11 +144,11 @@ def get_line(name, color, background_color):
     l.y = 4
     return l
 
-def load_on_disk_bmp(fn):
-    bmp = displayio.OnDiskBitmap(fn)
+def load_on_disk_bmp(filename):
+    bmp = displayio.OnDiskBitmap(filename)
     return displayio.TileGrid(bmp, pixel_shader=bmp.pixel_shader)
 
-def show_image(path):
+def load_network_bmp(path):
     # Fetch the bmp
     resp = requests.get(BASE_URL + path)
     bytes_img = BytesIO(resp.content)
@@ -155,7 +156,12 @@ def show_image(path):
     
     # Create a tile grid to display the bmp
     image, palette = imageload.load(bytes_img)
-    tile_grid = displayio.TileGrid(image, pixel_shader=palette)
+    return displayio.TileGrid(image, pixel_shader=palette)
+
+def show_image(path):
+    print(f"Showing image {path}")
+    path = f"images/{path}"
+    tile_grid = load_on_disk_bmp(path)
     
     # Clear the screen
     clear_image()
@@ -203,9 +209,6 @@ def build_arrival_row(arrival):
         use_default_colors = True
         route_color = [170, 170, 170]
         arrival_color = [255, 255, 255]
-        
-    print(route_color)
-    print(arrival_color)
     
     # Build icon
     if route_id == "B" and not use_default_colors:
@@ -217,7 +220,7 @@ def build_arrival_row(arrival):
     elif route_id == "G" and not use_default_colors:
         icon = get_line_g()
     else:
-        icon = get_line(route_id, route_color)
+        icon = get_line(route_id, (0,0,0), route_color)
     icon.y = LEMON_FILLED_OFFSET_Y
     group.append(icon)
     
@@ -234,8 +237,11 @@ def build_arrival_row(arrival):
     group.append(direction)
     
     # Bottom row: build time
-    delta_sec = arrival["arrival"] // 1000 - time.time()
-    delta = delta_sec // 60
+    if arrival["isNextStop"]:
+        delta = "NEXT"
+    if "arrival" in arrival:
+        delta_sec = arrival["arrival"] // 1000 - time.time()
+        delta = str(delta_sec // 60)
     time_label = label.Label(FONT, text=str(delta), color=arrival_color)
     time_label.y = FONT_OFFSET_Y + FONT_HEIGHT + 1
     time_label.x = 20
@@ -269,7 +275,7 @@ def update_clock():
     hour = (t_struct.tm_hour % 12) or 12
     min = t_struct.tm_min
     
-    clock_text.text = f"{hour:2}:{min:2}"
+    clock_text.text = f"{hour:2}:{min:02}"
 update_clock()
 
 #
@@ -303,7 +309,8 @@ while True:
     try:
         error_txt.hidden = True
         update_display()
-        last_update = time.time()
     except Exception as e:
-        print(e)
+        traceback.print_exception(e)
         error_txt.hidden = False
+    
+    last_update = time.time()

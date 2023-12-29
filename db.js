@@ -3,6 +3,15 @@ const DB_DEFAULT_DATA = {
         stops: [],
         display: {},
     },
+    schedule: [
+        [], // sun
+        [], // mon
+        [], // tue
+        [], // wed
+        [], // thu
+        [], // fri
+        [], // sat
+    ],
 };
 const DEFAULT_DISPLAY_CONFIG = {
     routeColor: [2, 2, 2],
@@ -24,7 +33,6 @@ const setup = doSetup();
 \*-------*/
 module.exports.getConfig = async () => {
     await setup;
-    await db.read();
     return db.data.config;
 };
 
@@ -39,11 +47,29 @@ module.exports.getStopDisplayConfig = async (stop) => {
     return stopConfig || DEFAULT_DISPLAY_CONFIG;
 };
 
+module.exports.getSchedule = async () => {
+    await setup;
+    return db.data.schedule;
+};
+module.exports.getScheduleToday = async () => {
+    await setup;
+
+    // Get whole schedule
+    const schedule = db.data.schedule;
+
+    // Get today's schedule
+    const todayIdx = new Date().getUTCDay();
+    const scheduleToday = schedule[todayIdx];
+
+    return scheduleToday;
+};
+
 /*-------*\
   SETTERS
 \*-------*/
 module.exports.addStop = async (stop) => {
     await setup;
+
     // Check incoming data
     const message = validateStop(stop);
     if (message) return [400, message];
@@ -55,7 +81,6 @@ module.exports.addStop = async (stop) => {
 
     // Commit data
     await db.write();
-
     return [201];
 };
 
@@ -71,7 +96,6 @@ module.exports.updateStopDisplayConfig = async (stop, displayConfig) => {
 
     // Commit data
     await db.write();
-
     return [200];
 };
 
@@ -85,7 +109,17 @@ module.exports.removeStop = async (stop) => {
 
     // Commit data
     await db.write();
+    return [200];
+};
 
+module.exports.setSchedule = async (schedule) => {
+    await setup;
+
+    // Replace schedule
+    db.data.schedule = schedule;
+
+    // Commit data
+    await db.write();
     return [200];
 };
 
