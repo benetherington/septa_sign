@@ -19,6 +19,8 @@ export default class SeptaConfiguration extends LitElement {
             display: flex;
             flex-direction: column;
             align-items: center;
+
+            font-size: var(--font-size);
         }
 
         h2 {

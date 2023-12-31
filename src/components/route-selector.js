@@ -15,6 +15,8 @@ export default class RouteSelector extends LitElement {
             display: flex;
             flex-direction: row;
             overflow-y: auto;
+
+            font-size: var(--font-size);
         }
 
         /* ---------- *\

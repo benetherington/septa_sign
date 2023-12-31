@@ -21,6 +21,7 @@ export default class BoldButton extends LitElement {
 
             text-align: center;
             font-weight: 600;
+            font-size: var(--font-size);
         }
 
         :host([slim]) {

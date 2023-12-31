@@ -16,6 +16,7 @@ export default class ColorPicker extends LitElement {
 
             border: 3px solid darkblue;
             border-radius: 5px;
+            font-size: var(--font-size);
         }
 
         .swatch-wrapper {

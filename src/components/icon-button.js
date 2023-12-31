@@ -9,6 +9,7 @@ export default class IconButton extends LitElement {
     static styles = css`
         :host {
             cursor: pointer;
+            display: flex;
 
             padding: 10px;
             border: 4px solid darkgreen;
@@ -18,6 +19,7 @@ export default class IconButton extends LitElement {
 
             text-align: center;
             font-weight: 600;
+            font-size: var(--font-size);
         }
 
         :host([color='red']) {
@@ -30,8 +32,8 @@ export default class IconButton extends LitElement {
         }
 
         svg {
-            height: 15px;
-            width: 15px;
+            height: var(--font-size);
+            width: var(--font-size);
         }
     `;
 

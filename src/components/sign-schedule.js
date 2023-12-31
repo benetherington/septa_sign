@@ -15,6 +15,7 @@ export default class SignSchedule extends LitElement {
             overflow-y: scroll;
 
             background-color: white;
+            font-size: var(--font-size);
         }
 
         /* ---- *\

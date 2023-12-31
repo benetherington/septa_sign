@@ -57,9 +57,25 @@ html {
     font-weight: 400;
 }
 
+@media (max-width: 1200px) {
+    /* Big text for mobile */
+    html {
+        --font-size: 2rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    /* Small text for laptops */
+    html {
+        --font-size: 1rem;
+    }
+}
+
 body {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     margin: 0;
+
+    font-size: var(--font-size);
 }
