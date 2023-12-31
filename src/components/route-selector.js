@@ -24,9 +24,11 @@ export default class RouteSelector extends LitElement {
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            flex-grow: 1;
         }
         :host([columns]) .list-container {
             width: 50%;
+            flex-grow: 0;
         }
 
         .route .name,
@@ -141,7 +143,10 @@ export default class RouteSelector extends LitElement {
     render() {
         return html`
             <div class="list-container">
-                ${until(this.routesContent(), html`Loading routes...`)}
+                ${until(
+                    this.routesContent(),
+                    html`<div class="list-continer">Loading routes...</div>`,
+                )}
             </div>
 
             ${this.columns ? this.stopSelector() : null}
@@ -187,8 +192,11 @@ export default class RouteSelector extends LitElement {
 
     stopSelector() {
         return this.routeId
-            ? until(this.stopsContent(), html`Loading stops...`)
-            : html`Select a route`;
+            ? until(
+                  this.stopsContent(),
+                  html`<div class="list-continer">Loading stops...</div>`,
+              )
+            : html`<div class="list-continer">Select a route</div>`;
     }
     async stopsContent() {
         if (!this.stops) this.stops = await this.getStops();
@@ -270,7 +278,7 @@ export default class RouteSelector extends LitElement {
     onResize = ([entry]) => {
         // Update display mode
         const width = entry.borderBoxSize[0].inlineSize;
-        const columns = width > 600;
+        const columns = width > 1200;
         this.columns = columns;
     };
 
