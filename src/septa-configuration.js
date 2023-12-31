@@ -422,7 +422,7 @@ export default class SeptaConfiguration extends LitElement {
         this.goHome();
     }
 
-    onDeleteClick(addr) {
+    onRemoveStopClick(addr) {
         this.removeStop(addr);
     }
 
