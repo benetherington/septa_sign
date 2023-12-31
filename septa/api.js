@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const {getESTOffsetMillis} = require('./timezone');
 
 const apiFetch = async (path, params = {}) => {
     const url = new URL('https://www3.septa.org/api/' + path);
@@ -138,8 +139,12 @@ module.exports.getBusArrivals = async (route, {stopname, stopid}) => {
 
         // Estimate arrival from timetable
         if (trip) {
-            const scheduledArrival = new Date(trip.DateCalender).getTime();
-            bus.arrival = scheduledArrival + bus.late * 60 * 1000;
+            // Interpret date as UTC (wrong but unambiguous)
+            const scheduledUTC = new Date(trip.DateCalender + ' z').getTime();
+            // Move time forward (subtract negative offset) from EST to actual UTC
+            const scheduledLocal = scheduledUTC - getESTOffsetMillis();
+            // Add in Septa's lateness
+            bus.arrival = scheduledLocal + bus.late * 60 * 1000;
         }
 
         arrivals.push(bus);
