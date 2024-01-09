@@ -1,2 +1,7 @@
 node_modules/**
 db.json
+circuit_python/.venv/**
+circuit_python/adafruit*/**
+circuit_python/bitmap-fonts/**
+circuit_python/esptool-*/**
+circuit_python/adafruit-circuitpython-*
