@@ -142,9 +142,9 @@ module.exports.getBusArrivals = async (route, {stopname, stopid}) => {
             // Interpret date as UTC (wrong but unambiguous)
             const scheduledUTC = new Date(trip.DateCalender + ' z').getTime();
             // Move time forward (subtract negative offset) from EST to actual UTC
-            const scheduledLocal = scheduledUTC - getESTOffsetMillis();
-            // Add in Septa's lateness
-            bus.arrival = scheduledLocal + bus.late * 60 * 1000;
+            bus.arrival = scheduledUTC - getESTOffsetMillis();
+            // Add in Septa's lateness if it's not unknown
+            if (bus.late !== 999) bus.arrival += bus.late * 60 * 1000;
         }
 
         arrivals.push(bus);
