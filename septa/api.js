@@ -1,6 +1,11 @@
 const fetch = require('node-fetch');
 const {getESTOffsetMillis} = require('./timezone');
 
+const {getEasterEggs} = require('./easter-egg');
+
+/*-----------------*\
+  SEPTA API WRAPPER
+\*-----------------*/
 const apiFetch = async (path, params = {}) => {
     const url = new URL('https://www3.septa.org/api/' + path);
     Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
