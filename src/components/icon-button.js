@@ -1,4 +1,4 @@
-import {LitElement, html, css} from '/lit-all.min.js';
+import {LitElement, html, css} from '../lit-all.min.js';
 
 export default class IconButton extends LitElement {
     static properties = {

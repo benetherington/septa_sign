@@ -1,4 +1,4 @@
-import {LitElement, html, css, map, until} from '/lit-all.min.js';
+import {LitElement, html, css, map, until} from './lit-all.min.js';
 
 import './components/route-selector.js';
 import './components/icon-button.js';
@@ -318,7 +318,7 @@ export default class SeptaConfiguration extends LitElement {
       API
     \*---*/
     async getConfig() {
-        const url = '/config';
+        const url = './config';
         const resp = await fetch(url);
         if (!resp.ok) {
             this.showError(resp);
@@ -329,7 +329,7 @@ export default class SeptaConfiguration extends LitElement {
     }
 
     async getDisplayConfig(addr) {
-        const url = `/config/${addr}`;
+        const url = `./config/${addr}`;
         const resp = await fetch(url);
         if (!resp.ok) {
             this.showError(resp);
@@ -342,7 +342,7 @@ export default class SeptaConfiguration extends LitElement {
     }
 
     async setDisplayConfig(addr, config) {
-        const url = `/config/${addr}`;
+        const url = `./config/${addr}`;
         const method = 'PUT';
         const headers = {'Content-Type': 'application/json'};
         const body = JSON.stringify(config);
@@ -357,7 +357,7 @@ export default class SeptaConfiguration extends LitElement {
     }
 
     async removeStop(addr) {
-        const url = '/config/stop';
+        const url = './config/stop';
         const method = 'DELETE';
         const body = addr;
 

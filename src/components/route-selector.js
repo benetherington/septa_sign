@@ -1,6 +1,6 @@
-import {LitElement, html, css, until, repeat, guard} from '/lit-all.min.js';
+import {LitElement, html, css, until, repeat, guard} from '../lit-all.min.js';
 
-import '/components/bold-button.js';
+import '../components/bold-button.js';
 
 export default class RouteSelector extends LitElement {
     static properties = {
@@ -251,17 +251,17 @@ export default class RouteSelector extends LitElement {
       UTILITIES
     \*---------*/
     async getRoutes() {
-        const url = '/septa/bus/routes';
+        const url = './septa/bus/routes';
         const resp = await fetch(url);
         return resp.json();
     }
     async getStops() {
-        const url = `/septa/bus/route/${this.routeId}`;
+        const url = `./septa/bus/route/${this.routeId}`;
         const resp = await fetch(url);
         return resp.json();
     }
     async addStop() {
-        const url = '/config/stop';
+        const url = './config/stop';
         const method = 'POST';
         const body = `${this.routeId}/${this.stopId}`;
 

@@ -2,12 +2,12 @@ const db = require('../db.js');
 const controller = require('../controllers/config');
 
 module.exports = (app) => {
-    app.get('/config', async (req, res) => {
+    app.get('/septa-sign/config', async (req, res) => {
         const data = await controller.getConfig();
         res.send(data);
     });
 
-    app.get('/config/:routeId/:stopId', async (req, res) => {
+    app.get('/septa-sign/config/:routeId/:stopId', async (req, res) => {
         const {routeId, stopId} = req.params;
         const stop = `${routeId}/${stopId}`;
 
@@ -15,14 +15,14 @@ module.exports = (app) => {
         res.send(data);
     });
 
-    app.post('/config/stop', async (req, res) => {
+    app.post('/septa-sign/config/stop', async (req, res) => {
         const [status, message] = await db.addStop(req.body);
         res.status(status);
         if (message) return res.send(message);
         else res.send();
     });
 
-    app.put('/config/:routeId/:stopId', async (req, res) => {
+    app.put('/septa-sign/config/:routeId/:stopId', async (req, res) => {
         const {routeId, stopId} = req.params;
         const stop = `${routeId}/${stopId}`;
 
@@ -35,7 +35,7 @@ module.exports = (app) => {
         else res.send();
     });
 
-    app.delete('/config/stop', async (req, res) => {
+    app.delete('/septa-sign/config/stop', async (req, res) => {
         const [status, message] = await db.removeStop(req.body);
         res.status(status);
         if (message) return res.send(message);

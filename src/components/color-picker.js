@@ -1,4 +1,4 @@
-import {LitElement, html, css, map} from '/lit-all.min.js';
+import {LitElement, html, css, map} from '../lit-all.min.js';
 
 export default class ColorPicker extends LitElement {
     static properties = {

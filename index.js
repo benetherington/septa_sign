@@ -11,7 +11,7 @@ app.use(express.text({type: '*/*'}));
 /*-------------*\
   STATIC ROUTES
 \*-------------*/
-app.use(express.static('./src'));
+app.use('/septa-sign', express.static('./src'));
 
 /*--------------*\
   DYNAMIC ROUTES

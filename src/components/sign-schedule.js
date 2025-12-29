@@ -1,6 +1,6 @@
-import {LitElement, html, css, map, until, guard} from '/lit-all.min.js';
+import {LitElement, html, css, map, until, guard} from '../lit-all.min.js';
 
-import '/components/bold-button.js';
+import '../components/bold-button.js';
 
 export default class SignSchedule extends LitElement {
     static properties = {
@@ -295,7 +295,7 @@ export default class SignSchedule extends LitElement {
     \*---*/
     async getSchedule() {
         // Fetch schedule
-        const resp = await fetch('/schedule');
+        const resp = await fetch('./schedule');
         const jsn = await resp.json();
 
         // Ensure each day has 24 hours
@@ -312,7 +312,7 @@ export default class SignSchedule extends LitElement {
 
     async updateSchedule() {
         // Prepare request
-        const url = '/schedule';
+        const url = './schedule';
         const method = 'PUT';
         const headers = {'Content-Type': 'application/json'};
         const body = JSON.stringify(this.schedule);
